@@ -1139,7 +1139,7 @@ function renderWeeksTable(){
     const yearRow = body.querySelector(`tr.year-row[data-year="${monthTr.dataset.year}"]`);
     const yearExpanded = yearRow ? yearRow.classList.contains('expanded') : true;
     const show = monthExpanded && yearExpanded;
-    body.querySelectorAll(`[data-group="${groupId}"]`).forEach(row=>{
+    body.querySelectorAll(`tr.week-row[data-group="${groupId}"], tr.detail-row[data-group="${groupId}"]`).forEach(row=>{
       row.classList.toggle('hidden-week', !show);
       if(!show){
         const inner = row.querySelector && row.querySelector('.detail-inner');
