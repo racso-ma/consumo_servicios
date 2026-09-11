@@ -119,5 +119,82 @@
     "total": 142294,
     "itemCount": 0,
     "uploadedAt": "2026-09-11T15:21:06.582Z"
+  },
+  {
+    "id": "1789144190103-lpc2z8",
+    "filename": "2°PISO.pdf",
+    "service": "HOSP. 2° PISO",
+    "weekRange": "2026-09-07/2026-09-11",
+    "monthKey": null,
+    "date": "2026-09-04",
+    "total": 80848.66,
+    "itemCount": 5,
+    "uploadedAt": "2026-09-11T16:29:50.103Z"
+  },
+  {
+    "id": "1789144190103-zigx4q",
+    "filename": "3°PISO.pdf",
+    "service": "HOSP. 3° PISO A",
+    "weekRange": "2026-09-07/2026-09-11",
+    "monthKey": null,
+    "date": "2026-09-04",
+    "total": 38422.74,
+    "itemCount": 8,
+    "uploadedAt": "2026-09-11T16:29:50.103Z"
+  },
+  {
+    "id": "1789144190103-0xr27r",
+    "filename": "4TO PISO.pdf",
+    "service": "PROCEDIMIENTO 4TO PISO",
+    "weekRange": "2026-09-07/2026-09-11",
+    "monthKey": null,
+    "date": "2026-09-10",
+    "total": 1118632.24,
+    "itemCount": 12,
+    "uploadedAt": "2026-09-11T16:29:50.103Z"
+  },
+  {
+    "id": "1789144190103-98hpz7",
+    "filename": "AMBULATORIO.pdf",
+    "service": "PABELLON AMBULATORIO",
+    "weekRange": "2026-09-07/2026-09-11",
+    "monthKey": null,
+    "date": "2026-09-07",
+    "total": 37376.21,
+    "itemCount": 9,
+    "uploadedAt": "2026-09-11T16:29:50.103Z"
+  },
+  {
+    "id": "1789144190103-cio0o8",
+    "filename": "Est1.pdf",
+    "service": "ESTERILIZACION",
+    "weekRange": "2026-09-07/2026-09-11",
+    "monthKey": null,
+    "date": "2026-09-08",
+    "total": 27000,
+    "itemCount": 1,
+    "uploadedAt": "2026-09-11T16:29:50.103Z"
+  },
+  {
+    "id": "1789144190103-j8l0li",
+    "filename": "EST2.pdf",
+    "service": "ESTERILIZACION",
+    "weekRange": "2026-09-07/2026-09-11",
+    "monthKey": null,
+    "date": "2026-09-09",
+    "total": 1281068.73,
+    "itemCount": 22,
+    "uploadedAt": "2026-09-11T16:29:50.103Z"
+  },
+  {
+    "id": "1789144190103-jeh7vg",
+    "filename": "GASTRO.pdf",
+    "service": "GASTROSCOPIA",
+    "weekRange": "2026-09-07/2026-09-11",
+    "monthKey": null,
+    "date": "2026-09-09",
+    "total": 1845794.8099999998,
+    "itemCount": 30,
+    "uploadedAt": "2026-09-11T16:29:50.103Z"
   }
 ]
