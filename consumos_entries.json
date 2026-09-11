@@ -1,0 +1,52 @@
+[
+  {
+    "id": "1789138623457-8zdb07",
+    "filename": "est.pdf",
+    "service": "ESTERILIZACION",
+    "weekRange": "2026-08-31/2026-09-04",
+    "date": "2026-09-02",
+    "total": 1162289.87,
+    "itemCount": 28,
+    "uploadedAt": "2026-09-11T14:57:03.457Z"
+  },
+  {
+    "id": "1789138623457-vh9h3q",
+    "filename": "gastro.pdf",
+    "service": "GASTROSCOPIA",
+    "weekRange": "2026-08-31/2026-09-04",
+    "date": "2026-09-01",
+    "total": 1663911.8599999999,
+    "itemCount": 24,
+    "uploadedAt": "2026-09-11T14:57:03.457Z"
+  },
+  {
+    "id": "1789138623457-8nh77b",
+    "filename": "lab.pdf",
+    "service": "LABORATORIO",
+    "weekRange": "2026-08-31/2026-09-04",
+    "date": "2026-09-02",
+    "total": 264836.05000000005,
+    "itemCount": 9,
+    "uploadedAt": "2026-09-11T14:57:03.457Z"
+  },
+  {
+    "id": "1789138623457-h9vvzb",
+    "filename": "PQ.pdf",
+    "service": "PABELLON QUIRURGICO",
+    "weekRange": "2026-08-31/2026-09-04",
+    "date": "2026-08-31",
+    "total": 168737.6,
+    "itemCount": 11,
+    "uploadedAt": "2026-09-11T14:57:03.457Z"
+  },
+  {
+    "id": "1789138623457-rti5wd",
+    "filename": "urg.pdf",
+    "service": "URGENCIA",
+    "weekRange": "2026-08-31/2026-09-04",
+    "date": "2026-09-01",
+    "total": 495175.04000000004,
+    "itemCount": 16,
+    "uploadedAt": "2026-09-11T14:57:03.457Z"
+  }
+]
