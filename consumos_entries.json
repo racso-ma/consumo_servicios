@@ -78,5 +78,15 @@
     "total": 73708,
     "itemCount": 0,
     "uploadedAt": "2026-09-11T15:06:37.446Z"
+  },
+  {
+    "id": "1789139481737-x6zojm",
+    "filename": "Ingreso manual",
+    "service": "RECUPERACION",
+    "weekRange": "2026-09-07/2026-09-11",
+    "date": null,
+    "total": 13890,
+    "itemCount": 0,
+    "uploadedAt": "2026-09-11T15:11:21.737Z"
   }
 ]
