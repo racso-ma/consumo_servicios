@@ -48,5 +48,15 @@
     "total": 495175.04000000004,
     "itemCount": 16,
     "uploadedAt": "2026-09-11T14:57:03.457Z"
+  },
+  {
+    "id": "1789139069733-w4t9n0",
+    "filename": "Ingreso manual",
+    "service": "RESONANCIA MAGNETICA",
+    "weekRange": "2026-08-31/2026-09-04",
+    "date": null,
+    "total": 5044088,
+    "itemCount": 0,
+    "uploadedAt": "2026-09-11T15:04:29.733Z"
   }
 ]
