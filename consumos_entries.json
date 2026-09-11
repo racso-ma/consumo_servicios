@@ -98,5 +98,15 @@
     "total": 42606,
     "itemCount": 0,
     "uploadedAt": "2026-09-11T15:19:58.781Z"
+  },
+  {
+    "id": "1789140066582-8lealo",
+    "filename": "Ingreso manual",
+    "service": "U.P.C. (UTI)",
+    "weekRange": "2026-08-31/2026-09-04",
+    "date": null,
+    "total": 142294,
+    "itemCount": 0,
+    "uploadedAt": "2026-09-11T15:21:06.582Z"
   }
 ]
