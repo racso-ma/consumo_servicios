@@ -633,8 +633,10 @@ let ENTRIES = [];
 let GH_SHA = null; // sha del archivo en GitHub, necesario para poder sobreescribirlo
 
 async function ghReadFile(){
-  const url = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_DATA_PATH}?ref=${GH_BRANCH}`;
-  const res = await fetch(url, { headers: { 'Accept': 'application/vnd.github.v3+json' } });
+  // cache:'no-store' + un query param único evita que el navegador sirva una copia vieja
+  // (guardada en caché) de este archivo, que es lo que causaba el error "sha does not match".
+  const url = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_DATA_PATH}?ref=${GH_BRANCH}&_=${Date.now()}`;
+  const res = await fetch(url, { headers: { 'Accept': 'application/vnd.github.v3+json' }, cache: 'no-store' });
   if(res.status === 404) return { entries: [], sha: null }; // el archivo aún no existe en el repo
   if(!res.ok) throw new Error('GitHub API respondió '+res.status);
   const data = await res.json();
@@ -657,7 +659,11 @@ async function ghWriteFile(entries, sha, token){
   });
   if(!res.ok){
     const err = await res.json().catch(()=>({}));
-    throw new Error(err.message || ('GitHub API respondió '+res.status));
+    const msg = err.message || ('GitHub API respondió '+res.status);
+    const isConflict = res.status === 409 || /does not match|sha/i.test(msg);
+    const e = new Error(msg);
+    e.isConflict = isConflict;
+    throw e;
   }
   return res.json();
 }
@@ -676,16 +682,27 @@ async function loadEntries(){
 async function saveEntries(){
   const token = localStorage.getItem('cpm_gh_token');
   if(!token){ alert('Falta el token de GitHub para guardar. Vuelve a intentar la acción para que te lo pida.'); return false; }
-  try{
-    const fresh = await ghReadFile(); // trae el sha más reciente por si alguien más escribió mientras tanto
-    const result = await ghWriteFile(ENTRIES, fresh.sha, token);
-    GH_SHA = result.content.sha;
-    return true;
-  }catch(e){
-    console.error('No se pudo guardar en GitHub:', e);
-    alert('No se pudo guardar en GitHub: '+e.message+'\n\nRevisa que el token tenga permiso "repo" y no haya expirado.');
-    return false;
+
+  for(let attempt=1; attempt<=2; attempt++){
+    try{
+      const fresh = await ghReadFile(); // trae el sha más reciente, sin caché
+      const result = await ghWriteFile(ENTRIES, fresh.sha, token);
+      GH_SHA = result.content.sha;
+      return true;
+    }catch(e){
+      if(e.isConflict && attempt===1){
+        console.warn('Choque de versión al guardar, reintentando con el sha más reciente…');
+        continue; // reintenta una vez con una lectura fresca
+      }
+      console.error('No se pudo guardar en GitHub:', e);
+      const hint = e.isConflict
+        ? 'El archivo cambió justo mientras se guardaba (alguien más guardó algo casi al mismo tiempo). Vuelve a intentarlo.'
+        : 'Revisa que el token tenga permiso "repo" y no haya expirado.';
+      alert('No se pudo guardar en GitHub: '+e.message+'\n\n'+hint);
+      return false;
+    }
   }
+  return false;
 }
 
 // ---------- data aggregation ----------
