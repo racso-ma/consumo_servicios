@@ -58,5 +58,15 @@
     "total": 5044088,
     "itemCount": 0,
     "uploadedAt": "2026-09-11T15:04:29.733Z"
+  },
+  {
+    "id": "1789139097022-o5eeoe",
+    "filename": "Ingreso manual",
+    "service": "HOSP. 2° PISO",
+    "weekRange": "2026-08-31/2026-09-04",
+    "date": null,
+    "total": 63267,
+    "itemCount": 0,
+    "uploadedAt": "2026-09-11T15:04:57.022Z"
   }
 ]
