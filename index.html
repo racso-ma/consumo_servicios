@@ -431,6 +431,27 @@
       <h2>Cargar salidas de abastecimiento</h2>
       <p class="hint">Sube uno o varios PDF de "Salida Abastecimiento". Se detecta automáticamente el centro de costo, la fecha y los ítems, y se valorizan con la lista de precios interna.</p>
       <div class="drop-inline" id="dropZone">Arrastra los PDF aquí, o haz clic para elegir archivos</div>
+      <p class="hint" style="margin:0;">¿No tienes el PDF a mano (foto, escaneo con correcciones a mano, etc.)? <a href="#" id="btnGoManual" style="color:var(--blue); font-weight:600;">Agregar un ingreso manual</a>.</p>
+    </div>
+    <div id="modalManual" style="display:none;">
+      <h2>Ingreso manual</h2>
+      <p class="hint">Para cuando ya calculaste el monto a mano (por ejemplo, un escaneo con correcciones) y solo quieres dejarlo registrado en el tablero.</p>
+      <div class="file-rows" style="max-height:none;">
+        <div class="file-row" style="grid-template-columns: 1fr 1fr 150px auto;">
+          <select id="manualService"></select>
+          <div class="week-shift">
+            <button id="manualPrev" title="Semana anterior">‹</button>
+            <span id="manualWeek"></span>
+            <button id="manualNext" title="Semana siguiente">›</button>
+          </div>
+          <input type="text" id="manualTotal" placeholder="Monto $ (ej: 142294)">
+          <input type="text" id="manualNote" placeholder="Nota (opcional)">
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost" id="btnCancelManual">Cancelar</button>
+        <button class="btn btn-primary" id="btnSaveManual">Guardar en el tablero</button>
+      </div>
     </div>
     <div id="modalProcessing" class="processing" style="display:none;">
       <div class="spinner"></div>
@@ -447,11 +468,11 @@
     </div>
     <div id="modalManage" style="display:none;">
       <h2>Cargas guardadas</h2>
-      <p class="hint">Estas son las salidas que has cargado en este navegador. Puedes eliminar alguna si se coló un error.</p>
+      <p class="hint">Estas son las salidas que se han cargado (comparten repo — las ve cualquiera con el link). Puedes eliminar alguna si se coló un error.</p>
       <div class="file-rows" id="manageRows"></div>
       <div class="modal-foot">
         <button class="btn btn-ghost" id="btnCloseManage">Cerrar</button>
-        <span></span>
+        <button class="btn btn-ghost" id="btnResetCreds" style="color:var(--red); border-color:#f3c9c9;">Cambiar clave / token</button>
       </div>
     </div>
   </div>
@@ -1272,6 +1293,7 @@ async function parsePdfFile(file){
 // ---------- upload flow ----------
 const modalBackdrop = document.getElementById('modalBackdrop');
 const modalStart = document.getElementById('modalStart');
+const modalManual = document.getElementById('modalManual');
 const modalProcessing = document.getElementById('modalProcessing');
 const modalPreview = document.getElementById('modalPreview');
 const modalManage = document.getElementById('modalManage');
@@ -1281,6 +1303,7 @@ let pendingResults = [];
 function openModal(view){
   modalBackdrop.classList.add('open');
   modalStart.style.display = view==='start' ? 'block':'none';
+  modalManual.style.display = view==='manual' ? 'block':'none';
   modalProcessing.style.display = view==='processing' ? 'block':'none';
   modalPreview.style.display = view==='preview' ? 'block':'none';
   modalManage.style.display = view==='manage' ? 'block':'none';
@@ -1431,12 +1454,69 @@ document.getElementById('btnConfirmSave').addEventListener('click', async ()=>{
   showToast(toSave.length===1 ? 'Semana guardada — visible para todos' : toSave.length+' archivos guardados — visibles para todos');
 });
 
+// ---------- manual entry ----------
+let manualWeekRange = weekRangeFromDate(new Date());
+
+function refreshManualWeekLabel(){
+  document.getElementById('manualWeek').textContent = weekLabel(manualWeekRange);
+}
+function populateManualServiceSelect(){
+  const sel = document.getElementById('manualService');
+  sel.innerHTML = SERVICE_ORDER.map(s=>`<option value="${s}">${s}</option>`).join('');
+}
+
+document.getElementById('btnGoManual').addEventListener('click', (e)=>{
+  e.preventDefault();
+  if(!unlockWrite()) return;
+  populateManualServiceSelect();
+  manualWeekRange = weekRangeFromDate(new Date());
+  refreshManualWeekLabel();
+  document.getElementById('manualTotal').value = '';
+  document.getElementById('manualNote').value = '';
+  openModal('manual');
+});
+document.getElementById('btnCancelManual').addEventListener('click', closeModal);
+document.getElementById('manualPrev').addEventListener('click', ()=>{ manualWeekRange = shiftWeek(manualWeekRange, -1); refreshManualWeekLabel(); });
+document.getElementById('manualNext').addEventListener('click', ()=>{ manualWeekRange = shiftWeek(manualWeekRange, 1); refreshManualWeekLabel(); });
+
+document.getElementById('btnSaveManual').addEventListener('click', async ()=>{
+  const service = document.getElementById('manualService').value;
+  const rawTotal = document.getElementById('manualTotal').value.replace(/[^\d.,-]/g,'').replace(/\./g,'').replace(',','.');
+  const total = parseFloat(rawTotal);
+  const note = document.getElementById('manualNote').value.trim();
+  if(!total || total <= 0){ alert('Ingresa un monto válido.'); return; }
+  if(!unlockWrite()) return;
+
+  const entry = {
+    id: Date.now()+'-'+Math.random().toString(36).slice(2,8),
+    filename: 'Ingreso manual' + (note ? ' — '+note : ''),
+    service, weekRange: manualWeekRange, date: null, total, itemCount: 0,
+    uploadedAt: new Date().toISOString()
+  };
+  ENTRIES.push(entry);
+
+  const btn = document.getElementById('btnSaveManual');
+  btn.disabled = true; btn.textContent = 'Guardando en GitHub…';
+  const ok = await saveEntries();
+  btn.disabled = false; btn.textContent = 'Guardar en el tablero';
+
+  if(!ok){ ENTRIES = ENTRIES.filter(e => e !== entry); return; }
+  closeModal();
+  render();
+  showToast('Ingreso manual guardado — visible para todos');
+});
+
 // ---------- manage uploads ----------
 document.getElementById('btnManage').addEventListener('click', ()=>{
   renderManage();
   openModal('manage');
 });
 document.getElementById('btnCloseManage').addEventListener('click', closeModal);
+document.getElementById('btnResetCreds').addEventListener('click', ()=>{
+  sessionStorage.removeItem('cpm_unlocked');
+  localStorage.removeItem('cpm_gh_token');
+  alert('Listo — la próxima vez que cargues o borres algo te va a pedir la clave y el token de nuevo.');
+});
 
 function renderManage(){
   const el = document.getElementById('manageRows');
