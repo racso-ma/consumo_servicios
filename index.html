@@ -183,14 +183,22 @@
   thead th:first-child{ border-radius:6px 0 0 6px; }
   thead th:last-child{ border-radius:0 6px 6px 0; }
   thead th.num, td.num{ text-align:right; }
+  tbody tr.year-row{ cursor:pointer; background: var(--blue); }
+  tbody tr.year-row:hover td{ background: var(--blue-dark); }
+  tbody tr.year-row td{ font-weight:800; font-size:13.5px; padding:11px 12px; color:#fff; }
+  tr.year-row .chev{ color: rgba(255,255,255,.85); }
+  tr.year-row .month-row-count{ color: rgba(255,255,255,.75); }
+  tr.year-row.expanded .chev{ transform: rotate(90deg); }
+
   tbody tr.week-row{ cursor:pointer; }
   tbody tr.month-row{ cursor:pointer; background: var(--blue-light); }
   tbody tr.month-row:hover td{ background:#dcebf7; }
   tbody tr.month-row td{ font-weight:700; font-size:13px; padding:10px 12px; color:var(--blue); }
+  tbody tr.month-row td:nth-child(2){ padding-left:30px; }
   .month-row-count{ color:var(--blue-muted); font-weight:500; font-size:12px; }
   tr.month-row.expanded .chev{ transform: rotate(90deg); }
-  tr.week-row td{ padding-left:28px; }
-  tr.week-row.hidden-week, tr.detail-row.hidden-week{ display:none; }
+  tr.week-row td{ padding-left:44px; }
+  tr.week-row.hidden-week, tr.detail-row.hidden-week, tr.month-row.hidden-week{ display:none; }
   tbody tr.week-row:hover td{ background: var(--blue-light); }
   tbody td{ padding: 11px 12px; border-bottom:1px solid var(--gray-100); font-size:13.5px; color:var(--text); }
   td.num{ font-family:'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
@@ -203,7 +211,7 @@
   .src-tag.live{ background:var(--green-bg); color:var(--green); border:1px solid #a7d7bc; }
 
   .detail-row td{ padding:0; border-bottom:1px solid var(--gray-100); }
-  .detail-inner{ padding: 4px 10px 18px 36px; display:none; background:var(--gray-50); }
+  .detail-inner{ padding: 4px 10px 18px 52px; display:none; background:var(--gray-50); }
   .detail-inner.open{ display:block; }
   .svc-line{ display:grid; grid-template-columns: 190px 1fr auto; align-items:center; gap:10px; padding: 5px 0; font-size:12.5px; }
   .svc-name{ color:var(--text-muted); }
@@ -402,7 +410,7 @@
   </div>
 
   <div class="panel">
-    <div class="panel-title">Detalle por semana <small>agrupado por mes — clic en un mes para desplegarlo, clic en una semana para ver el desglose por servicio</small></div>
+    <div class="panel-title">Detalle por semana <small>agrupado por año y mes — clic en un año o un mes para desplegarlo, clic en una semana para ver el desglose por servicio</small></div>
     <table>
       <thead>
         <tr>
@@ -1115,81 +1123,129 @@ function renderWeeksTable(){
     else groups.push({key, ranges:[r]});
   }
 
-  groups.forEach((g, gi)=>{
-    const [y,m] = g.key.split('-');
-    const monthTotal = g.ranges.reduce((a,r)=>a+weeksMapGlobal[r].total,0);
-    const monthDelta = monthTotal - BENCHMARK*g.ranges.length;
-    const groupId = 'grp-'+g.key;
-    let expanded = gi===0; // most recent month open by default
+  // group consecutive month-groups by year, preserving order
+  const yearGroups = [];
+  for(const g of groups){
+    const year = g.key.split('-')[0];
+    if(yearGroups.length && yearGroups[yearGroups.length-1].year===year){
+      yearGroups[yearGroups.length-1].groups.push(g);
+    } else {
+      yearGroups.push({year, groups:[g]});
+    }
+  }
 
-    const monthTr = document.createElement('tr');
-    monthTr.className = 'month-row'+(expanded?' expanded':'');
-    monthTr.innerHTML = `
+  function syncWeekVisibility(groupId, monthTr){
+    const monthExpanded = monthTr.classList.contains('expanded');
+    const yearRow = body.querySelector(`tr.year-row[data-year="${monthTr.dataset.year}"]`);
+    const yearExpanded = yearRow ? yearRow.classList.contains('expanded') : true;
+    const show = monthExpanded && yearExpanded;
+    body.querySelectorAll(`[data-group="${groupId}"]`).forEach(row=>{
+      row.classList.toggle('hidden-week', !show);
+      if(!show){
+        const inner = row.querySelector && row.querySelector('.detail-inner');
+        if(inner) inner.classList.remove('open');
+      }
+    });
+  }
+
+  yearGroups.forEach((yg, yi)=>{
+    const yearExpanded = yi===0; // most recent year open by default
+    const yearRanges = yg.groups.flatMap(g=>g.ranges);
+    const yearTotal = yearRanges.reduce((a,r)=>a+weeksMapGlobal[r].total,0);
+    const yearDelta = yearTotal - BENCHMARK*yearRanges.length;
+
+    const yearTr = document.createElement('tr');
+    yearTr.className = 'year-row'+(yearExpanded?' expanded':'');
+    yearTr.dataset.year = yg.year;
+    yearTr.innerHTML = `
       <td><span class="chev">▸</span></td>
-      <td>${MONTHS_ES_FULL[parseInt(m)-1]} ${y} <span class="month-row-count">· ${g.ranges.length} semana${g.ranges.length!==1?'s':''}</span></td>
-      <td class="num">${fmtCLP(monthTotal)}</td>
-      <td class="num"><span class="delta ${monthDelta<=0?'good':'bad'}">${fmtCLPSigned(monthDelta)}</span></td>
+      <td>${yg.year} <span class="month-row-count">· ${yearRanges.length} semana${yearRanges.length!==1?'s':''}</span></td>
+      <td class="num">${fmtCLP(yearTotal)}</td>
+      <td class="num"><span class="delta ${yearDelta<=0?'good':'bad'}">${fmtCLPSigned(yearDelta)}</span></td>
     `;
-    monthTr.addEventListener('click', ()=>{
-      expanded = !expanded;
-      monthTr.classList.toggle('expanded', expanded);
-      body.querySelectorAll(`[data-group="${groupId}"]`).forEach(row=>{
-        row.classList.toggle('hidden-week', !expanded);
-        if(!expanded){
-          // also collapse any open service-detail rows inside this month
-          const inner = row.querySelector('.detail-inner');
-          if(inner) inner.classList.remove('open');
-        }
+    yearTr.addEventListener('click', ()=>{
+      const expanded = yearTr.classList.toggle('expanded');
+      body.querySelectorAll(`tr.month-row[data-year="${yg.year}"]`).forEach(monthRow=>{
+        monthRow.classList.toggle('hidden-week', !expanded);
+        syncWeekVisibility(monthRow.dataset.group, monthRow);
       });
     });
-    body.appendChild(monthTr);
+    body.appendChild(yearTr);
 
-    for(const range of g.ranges){
-      const w = weeksMapGlobal[range];
-      const delta = w.total - BENCHMARK;
-      const tr = document.createElement('tr');
-      tr.className = 'week-row'+(expanded?'':' hidden-week');
-      tr.dataset.group = groupId;
-      tr.innerHTML = `
+    yg.groups.forEach((g, gi)=>{
+      const [y,m] = g.key.split('-');
+      const monthTotal = g.ranges.reduce((a,r)=>a+weeksMapGlobal[r].total,0);
+      const monthDelta = monthTotal - BENCHMARK*g.ranges.length;
+      const groupId = 'grp-'+g.key;
+      const monthExpanded = yearExpanded && yi===0 && gi===0; // most recent month of most recent year open by default
+
+      const monthTr = document.createElement('tr');
+      monthTr.className = 'month-row'+(monthExpanded?' expanded':'')+(yearExpanded?'':' hidden-week');
+      monthTr.dataset.group = groupId;
+      monthTr.dataset.year = yg.year;
+      monthTr.innerHTML = `
         <td><span class="chev">▸</span></td>
-        <td>${weekLabel(range)} ${w.live?'<span class="src-tag live">cargado</span>':''}</td>
-        <td class="num">${fmtCLP(w.total)}</td>
-        <td class="num"><span class="delta ${delta<=0?'good':'bad'}">${fmtCLPSigned(delta)}</span></td>
+        <td>${MONTHS_ES_FULL[parseInt(m)-1]} ${y} <span class="month-row-count">· ${g.ranges.length} semana${g.ranges.length!==1?'s':''}</span></td>
+        <td class="num">${fmtCLP(monthTotal)}</td>
+        <td class="num"><span class="delta ${monthDelta<=0?'good':'bad'}">${fmtCLPSigned(monthDelta)}</span></td>
       `;
-      const detailTr = document.createElement('tr');
-      detailTr.className = 'detail-row'+(expanded?'':' hidden-week');
-      detailTr.dataset.group = groupId;
-      const td = document.createElement('td');
-      td.colSpan = 4;
-      const inner = document.createElement('div');
-      inner.className = 'detail-inner';
-      if(w.services && Object.keys(w.services).length){
-        const maxVal = Math.max(...Object.values(w.services), 1);
-        inner.innerHTML = SERVICE_ORDER.map(svc=>{
-          const v = w.services[svc]||0;
-          return `<div class="svc-line">
-            <div class="svc-name">${svc.replace('°','º')}</div>
-            <div class="svc-bar-track"><div class="svc-bar-fill" style="width:${(v/maxVal*100).toFixed(1)}%"></div></div>
-            <div class="svc-val">${fmtCLP(v)}</div>
-          </div>`;
-        }).join('');
-      } else {
-        inner.innerHTML = `<div class="no-breakdown">No hay desglose por servicio disponible para esta semana.</div>`;
-      }
-      td.appendChild(inner);
-      detailTr.appendChild(td);
-
-      tr.addEventListener('click', (e)=>{
+      monthTr.addEventListener('click', (e)=>{
         e.stopPropagation();
-        const isOpen = inner.classList.contains('open');
-        document.querySelectorAll('.detail-inner.open').forEach(x=>x.classList.remove('open'));
-        document.querySelectorAll('tr.week-row.expanded').forEach(x=>x.classList.remove('expanded'));
-        if(!isOpen){ inner.classList.add('open'); tr.classList.add('expanded'); }
+        monthTr.classList.toggle('expanded');
+        syncWeekVisibility(groupId, monthTr);
       });
+      body.appendChild(monthTr);
 
-      body.appendChild(tr);
-      body.appendChild(detailTr);
-    }
+      for(const range of g.ranges){
+        const w = weeksMapGlobal[range];
+        const delta = w.total - BENCHMARK;
+        const rowVisible = monthExpanded && yearExpanded;
+        const tr = document.createElement('tr');
+        tr.className = 'week-row'+(rowVisible?'':' hidden-week');
+        tr.dataset.group = groupId;
+        tr.dataset.year = yg.year;
+        tr.innerHTML = `
+          <td><span class="chev">▸</span></td>
+          <td>${weekLabel(range)} ${w.live?'<span class="src-tag live">cargado</span>':''}</td>
+          <td class="num">${fmtCLP(w.total)}</td>
+          <td class="num"><span class="delta ${delta<=0?'good':'bad'}">${fmtCLPSigned(delta)}</span></td>
+        `;
+        const detailTr = document.createElement('tr');
+        detailTr.className = 'detail-row'+(rowVisible?'':' hidden-week');
+        detailTr.dataset.group = groupId;
+        detailTr.dataset.year = yg.year;
+        const td = document.createElement('td');
+        td.colSpan = 4;
+        const inner = document.createElement('div');
+        inner.className = 'detail-inner';
+        if(w.services && Object.keys(w.services).length){
+          const maxVal = Math.max(...Object.values(w.services), 1);
+          inner.innerHTML = SERVICE_ORDER.map(svc=>{
+            const v = w.services[svc]||0;
+            return `<div class="svc-line">
+              <div class="svc-name">${svc.replace('°','º')}</div>
+              <div class="svc-bar-track"><div class="svc-bar-fill" style="width:${(v/maxVal*100).toFixed(1)}%"></div></div>
+              <div class="svc-val">${fmtCLP(v)}</div>
+            </div>`;
+          }).join('');
+        } else {
+          inner.innerHTML = `<div class="no-breakdown">No hay desglose por servicio disponible para esta semana.</div>`;
+        }
+        td.appendChild(inner);
+        detailTr.appendChild(td);
+
+        tr.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          const isOpen = inner.classList.contains('open');
+          document.querySelectorAll('.detail-inner.open').forEach(x=>x.classList.remove('open'));
+          document.querySelectorAll('tr.week-row.expanded').forEach(x=>x.classList.remove('expanded'));
+          if(!isOpen){ inner.classList.add('open'); tr.classList.add('expanded'); }
+        });
+
+        body.appendChild(tr);
+        body.appendChild(detailTr);
+      }
+    });
   });
 
   if(ranges.length===0){
