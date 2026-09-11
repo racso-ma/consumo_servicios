@@ -447,6 +447,9 @@
           <input type="text" id="manualTotal" placeholder="Monto $ (ej: 142294)">
           <input type="text" id="manualNote" placeholder="Nota (opcional)">
         </div>
+        <div id="manualMonthRow" style="display:none; padding:10px 14px; background:var(--yellow-bg); border:1px solid #f3dca0; border-radius:8px; font-size:12.5px;">
+          Esta semana queda entre dos meses — ¿en cuál la cuento? <select id="manualMonthPick" style="margin-left:6px; padding:4px 8px; border-radius:5px; border:1px solid var(--border);"></select>
+        </div>
       </div>
       <div class="modal-foot">
         <button class="btn btn-ghost" id="btnCancelManual">Cancelar</button>
@@ -618,6 +621,32 @@ function weekMonthKey(range){
   const [a] = range.split('/');
   const d = new Date(a+'T00:00:00');
   return d.getFullYear()+'-'+pad(d.getMonth()+1);
+}
+function monthKeyOf(dateStr){
+  const d = new Date(dateStr+'T00:00:00');
+  return d.getFullYear()+'-'+pad(d.getMonth()+1);
+}
+function isAmbiguousMonthRange(range){
+  const [a,b] = range.split('/');
+  return monthKeyOf(a) !== monthKeyOf(b);
+}
+function monthOptionsForRange(range){
+  const [a,b] = range.split('/');
+  const ka = monthKeyOf(a), kb = monthKeyOf(b);
+  const label = (k)=>{ const [y,m] = k.split('-'); return MONTHS_ES_FULL[parseInt(m)-1]+' '+y; };
+  return [{key:ka, label:label(ka)}, {key:kb, label:label(kb)}];
+}
+// Para semanas que caen entre dos meses (ej. lun 31 ago - vie 04 sep), en vez de asumir
+// el mes del lunes, se usa el mes que la persona eligió explícitamente al cargar/ingresar
+// esa semana (guardado en entry.monthKey). Si nadie lo indicó, cae de vuelta al mes del lunes.
+function resolvedMonthKey(range){
+  const withOverride = ENTRIES.filter(e => e.weekRange === range && e.monthKey);
+  if(withOverride.length){
+    const counts = {};
+    withOverride.forEach(e => { counts[e.monthKey] = (counts[e.monthKey]||0) + 1; });
+    return Object.keys(counts).sort((a,b)=>counts[b]-counts[a])[0];
+  }
+  return weekMonthKey(range);
 }
 
 // ==================== CONFIGURACIÓN GITHUB — EDITA ESTO ANTES DE PUBLICAR ====================
@@ -918,7 +947,7 @@ function renderHeatmap(){
   // group into month segments for the label row
   const segments = [];
   for(const r of ranges){
-    const key = weekMonthKey(r);
+    const key = resolvedMonthKey(r);
     if(segments.length && segments[segments.length-1].key===key){ segments[segments.length-1].count++; }
     else segments.push({key, count:1});
   }
@@ -1081,7 +1110,7 @@ function renderWeeksTable(){
   // group consecutive ranges (already sorted desc) by month
   const groups = [];
   for(const r of ranges){
-    const key = weekMonthKey(r);
+    const key = resolvedMonthKey(r);
     if(groups.length && groups[groups.length-1].key===key) groups[groups.length-1].ranges.push(r);
     else groups.push({key, ranges:[r]});
   }
@@ -1172,7 +1201,7 @@ function renderMonths(){
   const ranges = sortedRanges(weeksMapGlobal);
   const byMonth = {};
   for(const r of ranges){
-    const key = weekMonthKey(r);
+    const key = resolvedMonthKey(r);
     if(!byMonth[key]) byMonth[key] = {total:0, weeks:0};
     byMonth[key].total += weeksMapGlobal[r].total;
     byMonth[key].weeks += 1;
@@ -1395,6 +1424,20 @@ function renderPreview(){
     if(!r.weekRange) warn.push('no se detectó fecha');
     if(r.missingCodes.length) warn.push(r.missingCodes.length+' código(s) sin precio');
     if(r.warning) warn.push(r.warning);
+
+    let monthRowHtml = '';
+    if(r.weekRange && isAmbiguousMonthRange(r.weekRange)){
+      const opts = monthOptionsForRange(r.weekRange);
+      if(!r.monthKey) r.monthKey = opts[0].key;
+      monthRowHtml = `<div class="file-row" style="grid-template-columns:1fr; background:var(--yellow-bg); border-color:#f3dca0; margin-top:-4px;">
+        <div style="font-size:12px;">Esta semana queda entre dos meses — ¿en cuál la cuento?
+          <select class="f-month" data-idx="${idx}" style="margin-left:6px; padding:4px 8px; border-radius:5px; border:1px solid var(--border);">
+            ${opts.map(o=>`<option value="${o.key}" ${o.key===r.monthKey?'selected':''}>${o.label}</option>`).join('')}
+          </select>
+        </div>
+      </div>`;
+    }
+
     return `<div class="file-row" data-idx="${idx}">
       <div>
         <div class="fname" title="${r.filename}">${r.filename}</div>
@@ -1408,25 +1451,34 @@ function renderPreview(){
       </div>
       <div class="fval">${fmtCLP(r.total)}</div>
       <button class="fdel" title="Quitar">×</button>
-    </div>`;
+    </div>` + monthRowHtml;
   }).join('');
 
   el.querySelectorAll('.file-row').forEach(row=>{
     const idx = parseInt(row.dataset.idx);
+    if(isNaN(idx)) return;
     row.querySelector('.f-service').addEventListener('change', (e)=>{ pendingResults[idx].service = e.target.value; });
     row.querySelector('.f-prev').addEventListener('click', ()=>{
       const r = pendingResults[idx];
       r.weekRange = shiftWeek(r.weekRange || weekRangeFromDate(new Date()), -1);
-      row.querySelector('.f-week').textContent = weekLabel(r.weekRange);
+      r.monthKey = null;
+      renderPreview();
     });
     row.querySelector('.f-next').addEventListener('click', ()=>{
       const r = pendingResults[idx];
       r.weekRange = shiftWeek(r.weekRange || weekRangeFromDate(new Date()), 1);
-      row.querySelector('.f-week').textContent = weekLabel(r.weekRange);
+      r.monthKey = null;
+      renderPreview();
     });
     row.querySelector('.fdel').addEventListener('click', ()=>{
       pendingResults.splice(idx,1);
       renderPreview();
+    });
+  });
+  el.querySelectorAll('.f-month').forEach(sel=>{
+    sel.addEventListener('change', (e)=>{
+      const idx = parseInt(e.target.dataset.idx);
+      pendingResults[idx].monthKey = e.target.value;
     });
   });
 }
@@ -1449,6 +1501,7 @@ document.getElementById('btnConfirmSave').addEventListener('click', async ()=>{
     filename: r.filename,
     service: r.service,
     weekRange: r.weekRange,
+    monthKey: r.monthKey || null,
     date: r.date,
     total: r.total,
     itemCount: r.itemCount,
@@ -1473,10 +1526,22 @@ document.getElementById('btnConfirmSave').addEventListener('click', async ()=>{
 
 // ---------- manual entry ----------
 let manualWeekRange = weekRangeFromDate(new Date());
+let manualMonthKey = null;
 
 function refreshManualWeekLabel(){
   document.getElementById('manualWeek').textContent = weekLabel(manualWeekRange);
+  const row = document.getElementById('manualMonthRow');
+  if(isAmbiguousMonthRange(manualWeekRange)){
+    const opts = monthOptionsForRange(manualWeekRange);
+    manualMonthKey = opts[0].key;
+    document.getElementById('manualMonthPick').innerHTML = opts.map(o=>`<option value="${o.key}">${o.label}</option>`).join('');
+    row.style.display = 'block';
+  } else {
+    manualMonthKey = null;
+    row.style.display = 'none';
+  }
 }
+document.getElementById('manualMonthPick').addEventListener('change', (e)=>{ manualMonthKey = e.target.value; });
 function populateManualServiceSelect(){
   const sel = document.getElementById('manualService');
   sel.innerHTML = SERVICE_ORDER.map(s=>`<option value="${s}">${s}</option>`).join('');
@@ -1507,7 +1572,7 @@ document.getElementById('btnSaveManual').addEventListener('click', async ()=>{
   const entry = {
     id: Date.now()+'-'+Math.random().toString(36).slice(2,8),
     filename: 'Ingreso manual' + (note ? ' — '+note : ''),
-    service, weekRange: manualWeekRange, date: null, total, itemCount: 0,
+    service, weekRange: manualWeekRange, monthKey: manualMonthKey, date: null, total, itemCount: 0,
     uploadedAt: new Date().toISOString()
   };
   ENTRIES.push(entry);
