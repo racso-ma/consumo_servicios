@@ -196,5 +196,71 @@
     "total": 1845794.8099999998,
     "itemCount": 30,
     "uploadedAt": "2026-09-11T16:29:50.103Z"
+  },
+  {
+    "id": "1789144310519-xbqioi",
+    "filename": "IMAGEN.pdf",
+    "service": "RESONANCIA MAGNETICA",
+    "weekRange": "2026-09-07/2026-09-11",
+    "monthKey": null,
+    "date": "2026-09-04",
+    "total": 2524482.2,
+    "itemCount": 17,
+    "uploadedAt": "2026-09-11T16:31:50.519Z"
+  },
+  {
+    "id": "1789144310519-ubr7cx",
+    "filename": "KINE.pdf",
+    "service": "KINESITERAPIA",
+    "weekRange": "2026-09-07/2026-09-11",
+    "monthKey": null,
+    "date": "2026-09-04",
+    "total": 74118.69,
+    "itemCount": 3,
+    "uploadedAt": "2026-09-11T16:31:50.519Z"
+  },
+  {
+    "id": "1789144310519-wbyd05",
+    "filename": "LAB.pdf",
+    "service": "LABORATORIO",
+    "weekRange": "2026-09-07/2026-09-11",
+    "monthKey": null,
+    "date": "2026-09-10",
+    "total": 629396.47,
+    "itemCount": 11,
+    "uploadedAt": "2026-09-11T16:31:50.519Z"
+  },
+  {
+    "id": "1789144310519-lskd6b",
+    "filename": "PQ.pdf",
+    "service": "PABELLON QUIRURGICO",
+    "weekRange": "2026-09-07/2026-09-11",
+    "monthKey": null,
+    "date": "2026-09-07",
+    "total": 401191.16000000003,
+    "itemCount": 14,
+    "uploadedAt": "2026-09-11T16:31:50.519Z"
+  },
+  {
+    "id": "1789144310519-asyr2n",
+    "filename": "upc.pdf",
+    "service": "U.P.C. (UTI)",
+    "weekRange": "2026-09-07/2026-09-11",
+    "monthKey": null,
+    "date": "2026-09-07",
+    "total": 177052,
+    "itemCount": 10,
+    "uploadedAt": "2026-09-11T16:31:50.519Z"
+  },
+  {
+    "id": "1789144310519-plb4i7",
+    "filename": "URG.pdf",
+    "service": "URGENCIA",
+    "weekRange": "2026-09-07/2026-09-11",
+    "monthKey": null,
+    "date": "2026-09-08",
+    "total": 192699.44,
+    "itemCount": 10,
+    "uploadedAt": "2026-09-11T16:31:50.519Z"
   }
 ]
