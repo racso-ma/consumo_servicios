@@ -4,6 +4,7 @@
     "filename": "est.pdf",
     "service": "ESTERILIZACION",
     "weekRange": "2026-08-31/2026-09-04",
+    "monthKey": "2026-09",
     "date": "2026-09-02",
     "total": 1162289.87,
     "itemCount": 28,
@@ -14,8 +15,9 @@
     "filename": "gastro.pdf",
     "service": "GASTROSCOPIA",
     "weekRange": "2026-08-31/2026-09-04",
+    "monthKey": "2026-09",
     "date": "2026-09-01",
-    "total": 1663911.8599999999,
+    "total": 1663911.86,
     "itemCount": 24,
     "uploadedAt": "2026-09-11T14:57:03.457Z"
   },
@@ -24,8 +26,9 @@
     "filename": "lab.pdf",
     "service": "LABORATORIO",
     "weekRange": "2026-08-31/2026-09-04",
+    "monthKey": "2026-09",
     "date": "2026-09-02",
-    "total": 264836.05000000005,
+    "total": 264836.05,
     "itemCount": 9,
     "uploadedAt": "2026-09-11T14:57:03.457Z"
   },
@@ -34,79 +37,7 @@
     "filename": "PQ.pdf",
     "service": "PABELLON QUIRURGICO",
     "weekRange": "2026-08-31/2026-09-04",
+    "monthKey": "2026-09",
     "date": "2026-08-31",
     "total": 168737.6,
     "itemCount": 11,
-    "uploadedAt": "2026-09-11T14:57:03.457Z"
-  },
-  {
-    "id": "1789138623457-rti5wd",
-    "filename": "urg.pdf",
-    "service": "URGENCIA",
-    "weekRange": "2026-08-31/2026-09-04",
-    "date": "2026-09-01",
-    "total": 495175.04000000004,
-    "itemCount": 16,
-    "uploadedAt": "2026-09-11T14:57:03.457Z"
-  },
-  {
-    "id": "1789139069733-w4t9n0",
-    "filename": "Ingreso manual",
-    "service": "RESONANCIA MAGNETICA",
-    "weekRange": "2026-08-31/2026-09-04",
-    "date": null,
-    "total": 5044088,
-    "itemCount": 0,
-    "uploadedAt": "2026-09-11T15:04:29.733Z"
-  },
-  {
-    "id": "1789139097022-o5eeoe",
-    "filename": "Ingreso manual",
-    "service": "HOSP. 2° PISO",
-    "weekRange": "2026-08-31/2026-09-04",
-    "date": null,
-    "total": 63267,
-    "itemCount": 0,
-    "uploadedAt": "2026-09-11T15:04:57.022Z"
-  },
-  {
-    "id": "1789139197446-dpnvox",
-    "filename": "Ingreso manual",
-    "service": "KINESITERAPIA",
-    "weekRange": "2026-08-31/2026-09-04",
-    "date": null,
-    "total": 73708,
-    "itemCount": 0,
-    "uploadedAt": "2026-09-11T15:06:37.446Z"
-  },
-  {
-    "id": "1789139622530-di9oe2",
-    "filename": "Ingreso manual",
-    "service": "RECUPERACION",
-    "weekRange": "2026-08-31/2026-09-04",
-    "date": null,
-    "total": 13890,
-    "itemCount": 0,
-    "uploadedAt": "2026-09-11T15:13:42.530Z"
-  },
-  {
-    "id": "1789139998781-tkrlou",
-    "filename": "Ingreso manual",
-    "service": "HOSP. 3° PISO A",
-    "weekRange": "2026-08-31/2026-09-04",
-    "date": null,
-    "total": 42606,
-    "itemCount": 0,
-    "uploadedAt": "2026-09-11T15:19:58.781Z"
-  },
-  {
-    "id": "1789140066582-8lealo",
-    "filename": "Ingreso manual",
-    "service": "U.P.C. (UTI)",
-    "weekRange": "2026-08-31/2026-09-04",
-    "date": null,
-    "total": 142294,
-    "itemCount": 0,
-    "uploadedAt": "2026-09-11T15:21:06.582Z"
-  }
-]
