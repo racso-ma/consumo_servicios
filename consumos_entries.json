@@ -88,5 +88,15 @@
     "total": 13890,
     "itemCount": 0,
     "uploadedAt": "2026-09-11T15:13:42.530Z"
+  },
+  {
+    "id": "1789139998781-tkrlou",
+    "filename": "Ingreso manual",
+    "service": "HOSP. 3° PISO A",
+    "weekRange": "2026-08-31/2026-09-04",
+    "date": null,
+    "total": 42606,
+    "itemCount": 0,
+    "uploadedAt": "2026-09-11T15:19:58.781Z"
   }
 ]
